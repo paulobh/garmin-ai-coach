@@ -16,8 +16,7 @@ if str(ROOT_DIR) not in sys.path:
 
 from src.database.db import init_db
 from src.collectors.sync_worker import SyncWorker
-from src.bot.telegram_service import start_telegram_polling
-from src.config import SYNC_INTERVAL_MINUTES, TELEGRAM_BOT_TOKEN
+from src.config import SYNC_INTERVAL_MINUTES, TELEGRAM_BOT_TOKEN, ENABLE_TELEGRAM_POLLING
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("GarminAICoach")
@@ -45,10 +44,14 @@ def run_sync_scheduler():
 
 
 def run_telegram_bot():
-    """Starts Telegram bot polling if token is provided."""
+    """Starts Telegram bot polling if token is provided and polling is enabled."""
     if not TELEGRAM_BOT_TOKEN:
         logger.info("TELEGRAM_BOT_TOKEN not provided. Telegram bot listener disabled.")
         return
+    if not ENABLE_TELEGRAM_POLLING:
+        logger.info("ENABLE_TELEGRAM_POLLING is disabled (push-only mode). Polling listener not started to avoid conflict.")
+        return
+    from src.bot.telegram_service import start_telegram_polling
     logger.info("Initializing Telegram bot listener thread...")
     try:
         start_telegram_polling()

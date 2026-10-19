@@ -24,13 +24,14 @@ TOKENS_DIR.mkdir(parents=True, exist_ok=True)
 # Environment settings
 AI_PROVIDER = os.getenv("AI_PROVIDER", "gemini").lower() # "gemini" or "openai" (OpenAI, Ollama, Groq, OpenRouter)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+ENABLE_TELEGRAM_POLLING = os.getenv("ENABLE_TELEGRAM_POLLING", "false").lower() in ("true", "1", "yes")
 SYNC_INTERVAL_MINUTES = int(os.getenv("SYNC_INTERVAL_MINUTES", "30"))
 TIMEZONE = os.getenv("TIMEZONE", "America/Sao_Paulo")
 
