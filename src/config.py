@@ -53,3 +53,43 @@ def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
         if u.get("id") == user_id:
             return u
     return None
+
+
+def save_users_config(users_list: List[Dict[str, Any]]) -> bool:
+    """Saves the athlete list to config/users.yaml."""
+    users_file = CONFIG_DIR / "users.yaml"
+    try:
+        with open(users_file, "w", encoding="utf-8") as f:
+            yaml.dump({"users": users_list}, f, sort_keys=False, allow_unicode=True)
+        return True
+    except Exception as e:
+        print(f"Error saving users config: {e}")
+        return False
+
+
+def upsert_user_config(user_dict: Dict[str, Any]) -> bool:
+    """Inserts or updates an athlete in config/users.yaml."""
+    users = load_users_config()
+    existing_idx = None
+    for idx, u in enumerate(users):
+        if u.get("id") == user_dict["id"]:
+            existing_idx = idx
+            break
+
+    if existing_idx is not None:
+        # Preserve password if not provided in update
+        if not user_dict.get("garmin_password") and users[existing_idx].get("garmin_password"):
+            user_dict["garmin_password"] = users[existing_idx]["garmin_password"]
+        users[existing_idx] = user_dict
+    else:
+        users.append(user_dict)
+
+    return save_users_config(users)
+
+
+def delete_user_config(user_id: str) -> bool:
+    """Removes an athlete from config/users.yaml."""
+    users = load_users_config()
+    new_users = [u for u in users if u.get("id") != user_id]
+    return save_users_config(new_users)
+

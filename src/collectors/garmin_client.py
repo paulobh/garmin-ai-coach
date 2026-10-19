@@ -82,7 +82,20 @@ class GarminCoachClient:
             logger.error(f"[{self.user_id}] Unexpected error during Garmin login: {e}")
             return False, f"error: {str(e)}", None
 
+    def resume_mfa(self, client: Garmin, mfa_context: Any, mfa_code: str) -> Tuple[bool, str]:
+        """Resumes an in-flight login that was paused for MFA verification."""
+        try:
+            client.resume_login(mfa_context, mfa_code)
+            self._save_session_tokens(client)
+            self.client = client
+            logger.info(f"[{self.user_id}] MFA verification succeeded! Tokens cached.")
+            return True, "authenticated_mfa"
+        except Exception as e:
+            logger.error(f"[{self.user_id}] MFA verification failed: {e}")
+            return False, str(e)
+
     def _save_session_tokens(self, client: Garmin):
+
         """Dumps tokens to disk safely."""
         try:
             if hasattr(client, "client") and hasattr(client.client, "dump"):
