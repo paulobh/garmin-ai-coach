@@ -1,5 +1,7 @@
 # 🏛️ Architecture & System Design — Garmin AI Coach
 
+[← Back to Main README](../README.md)
+
 This document details the architectural components, data ingestion flow, database schema, and AI prompting mechanics of **Garmin AI Coach**.
 
 ---
@@ -89,3 +91,8 @@ flowchart TD
 - Data directories and database rows are separated by `user_id`.
 - The Telegram Bot matches the sender's `chat_id` to the corresponding athlete, ensuring private, isolated coaching.
 - The Streamlit Web UI features a profile switcher in the sidebar to toggle between household members with one click.
+
+---
+
+[← Back to Main README](../README.md)
+

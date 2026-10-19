@@ -1,5 +1,7 @@
 # 👥 Multi-User & Household Setup Guide
 
+[← Back to Main README](../README.md)
+
 **Garmin AI Coach** is designed from the ground up to support multiple athletes within the same home or team (e.g. couples, training partners, or families where multiple people use Garmin watches).
 
 ---
@@ -105,3 +107,8 @@ python -m src.cli.login --user partner
 ```
 
 Once both have valid token files in `data/tokens/`, the background sync daemon will sync both accounts concurrently on each cycle!
+
+---
+
+[← Back to Main README](../README.md)
+

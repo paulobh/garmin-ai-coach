@@ -1,5 +1,7 @@
 # 🚀 Getting Started with Garmin AI Coach
 
+[← Back to Main README](../README.md)
+
 This step-by-step guide will walk you through setting up **Garmin AI Coach** on your machine or server.
 
 ```mermaid
@@ -130,3 +132,8 @@ Or run individual components:
 * **Sync Scheduler Only:** `python -m src.main --mode worker`
 * **Telegram Bot Only:** `python -m src.main --mode bot`
 * **Single Sync Cycle & Exit:** `python -m src.collectors.sync_worker --once`
+
+---
+
+[← Back to Main README](../README.md)
+

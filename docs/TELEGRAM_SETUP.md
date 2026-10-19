@@ -1,5 +1,7 @@
 # 🤖 Telegram Setup Guide
 
+[← Back to Main README](../README.md)
+
 Setting up a private Telegram bot allows you to receive **automated morning readiness briefings**, **instant post-workout analysis**, and **ask questions directly to your AI Coach** while on the go.
 
 ---
@@ -100,4 +102,9 @@ To make Telegram display the command suggestions menu when you type `/`:
 * **Testing your Telegram connection immediately:**
   * Run: `python -m src.main --mode bot`
   * Send `/start` to your bot. If properly linked, it will reply: `Welcome back, Paulo! Your Garmin AI Coach is active.`
+
+---
+
+[← Back to Main README](../README.md)
+
 
