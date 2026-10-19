@@ -1,0 +1,42 @@
+# ==========================================================
+# Garmin AI Coach - Multi-User Configuration Example
+# Copy this file to config/users.yaml and fill in your details.
+# DO NOT commit config/users.yaml with real credentials!
+# ==========================================================
+
+users:
+  - id: "athlete_1"
+    display_name: "Paulo"
+    garmin_email: "athlete1@example.com"
+    garmin_password: "your_garmin_password_here"  # Used once during initial login to generate session tokens
+    telegram_chat_id: 123456789                  # Optional: ID from @userinfobot for private Telegram alerts
+    morning_report_time: "07:00"                 # Time in 24h format for daily readiness push
+    send_morning_report: true
+    send_activity_report: true
+    primary_sports:
+      - "running"
+      - "cycling"
+      - "trail_running"
+      - "tennis"
+      - "pickleball"
+      - "strength_training"
+    preferences:
+      language: "pt-BR"                          # "pt-BR" or "en" for AI generated coach messages
+      coaching_style: "balanced"                 # "balanced", "analytical", "encouraging", or "strict"
+      unit_system: "metric"                      # "metric" (km/m) or "imperial" (mi/ft)
+
+  - id: "athlete_2"
+    display_name: "Partner"
+    garmin_email: "partner@example.com"
+    garmin_password: "your_garmin_password_here"
+    telegram_chat_id: 987654321
+    morning_report_time: "07:30"
+    send_morning_report: true
+    send_activity_report: true
+    primary_sports:
+      - "running"
+      - "strength_training"
+    preferences:
+      language: "pt-BR"
+      coaching_style: "encouraging"
+      unit_system: "metric"

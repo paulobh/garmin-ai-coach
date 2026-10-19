@@ -1,0 +1,20 @@
+# Core Garmin API
+garminconnect>=0.2.18
+curl_cffi>=0.7.0
+
+# AI / LLM
+google-generativeai>=0.8.0
+
+# Web Dashboard & Visuals
+streamlit>=1.38.0
+plotly>=5.24.0
+pandas>=2.2.0
+
+# Telegram Bot
+pyTelegramBotAPI>=4.22.0
+
+# Config & Scheduler
+pyyaml>=6.0.1
+python-dotenv>=1.0.1
+schedule>=1.2.2
+requests>=2.32.0

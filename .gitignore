@@ -1,0 +1,56 @@
+# Environment and Secrets
+.env
+.env.local
+config/users.yaml
+config/config.yaml
+secrets.md
+
+# Persistent user data, tokens, and local database
+data/
+*.db
+*.sqlite
+*.sqlite3
+tokens/
+*.session
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# IDEs & System
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+*.log

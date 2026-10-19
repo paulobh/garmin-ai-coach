@@ -1,0 +1,21 @@
+# ==========================================================
+# Garmin AI Coach - Global Configuration Example
+# ==========================================================
+
+system:
+  sync_interval_minutes: 30
+  timezone: "America/Sao_Paulo"
+  log_level: "INFO"
+
+ai:
+  provider: "gemini"
+  model: "gemini-2.5-flash"
+  fallback_models:
+    - "gemini-1.5-flash"
+    - "gemini-2.0-flash"
+    - "gemini-1.5-pro"
+
+web:
+  port: 8502
+  host: "0.0.0.0"
+  theme: "dark"
