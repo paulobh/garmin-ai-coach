@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 bot: Optional[telebot.TeleBot] = None
 if TELEGRAM_BOT_TOKEN:
     try:
-        bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN, parse_mode="Markdown")
+        bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
     except Exception as e:
         logger.error(f"Failed to initialize Telegram bot: {e}")
 
@@ -35,7 +35,7 @@ def get_athlete_by_chat_id(chat_id: int) -> Optional[Dict[str, Any]]:
 
 
 def send_notification(chat_id: int, text: str) -> bool:
-    """Sends a markdown message to a specific Telegram chat ID with fallback."""
+    """Sends a message to a specific Telegram chat ID with Markdown and plain-text fallback."""
     if not bot or not chat_id:
         return False
 
@@ -46,9 +46,10 @@ def send_notification(chat_id: int, text: str) -> bool:
             chunk = text[i:i + max_len]
             try:
                 bot.send_message(chat_id, chunk, parse_mode="Markdown")
-            except telebot.apihelper.ApiTelegramException:
-                # If markdown fails due to unescaped special characters, send plain text
-                bot.send_message(chat_id, chunk, parse_mode=None)
+            except Exception as e:
+                # If markdown fails due to unescaped special characters, fallback cleanly to plain text
+                logger.warning(f"Markdown parsing failed on Telegram message ({e}). Retrying with plain text.")
+                bot.send_message(chat_id, chunk, parse_mode="")
         return True
     except Exception as e:
         logger.error(f"Failed to send Telegram message to {chat_id}: {e}")
