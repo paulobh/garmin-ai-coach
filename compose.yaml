@@ -12,6 +12,7 @@ services:
     volumes:
       - ./config:/app/config
       - ./data:/app/data
+      - ./src:/app/src
     environment:
       - STREAMLIT_SERVER_PORT=8502
       - STREAMLIT_SERVER_ADDRESS=0.0.0.0
