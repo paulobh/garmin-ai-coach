@@ -2,6 +2,13 @@
 
 This step-by-step guide will walk you through setting up **Garmin AI Coach** on your machine or server.
 
+```mermaid
+flowchart LR
+    S1["1. Clone & Configure\n(.env, users.yaml)"] --> S2["2. Authenticate & 2FA\n(CLI or Streamlit)"]
+    S2 --> S3["3. Launch Stack\n(Docker Compose)"]
+    S3 --> S4["4. Enjoy Insights\n(Web Port 8502 & Telegram)"]
+```
+
 ---
 
 ## Prerequisites

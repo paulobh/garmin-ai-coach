@@ -49,30 +49,33 @@ The coach adapts its physiological analysis depending on the sport:
 
 ## 📸 Architecture Overview
 
-```
-Garmin Connect Cloud
-        │
-        ▼ (python-garminconnect + Token Caching)
-┌──────────────────────────────────────────────┐
-│            Garmin AI Coach Core              │
-│                                              │
-│  ┌────────────────────┐ ┌──────────────────┐ │
-│  │  SyncWorker Daemon │ │ SQLite (Local)   │ │
-│  │  (Auto 30m checks) │ │ garmin_coach.db  │ │
-│  └─────────┬──────────┘ └────────┬─────────┘ │
-│            │                     │           │
-│            ▼                     ▼           │
-│  ┌────────────────────────────────────────┐  │
-│  │   Gemini Prompt & Reasoning Engine     │  │
-│  └───────────────────┬────────────────────┘  │
-└──────────────────────┼───────────────────────┘
-                       │
-         ┌─────────────┴─────────────┐
-         ▼                           ▼
-┌──────────────────┐       ┌──────────────────┐
-│  Telegram Bot    │       │  Streamlit App   │
-│  (Push & Chat)   │       │  (Port 8502)     │
-└──────────────────┘       └──────────────────┘
+```mermaid
+flowchart TD
+    subgraph Cloud ["Garmin Cloud"]
+        GC["Garmin Connect API"]
+    end
+
+    subgraph Core ["Garmin AI Coach Core Engine"]
+        Worker["SyncWorker Daemon (Auto 30m Checks)"]
+        Tokens[("Token Store (OAuth Session Cache)")]
+        DB[("Embedded SQLite DB (garmin_coach.db)")]
+        AI["Gemini Reasoning Engine (gemini-2.5-flash)"]
+
+        Tokens <--> Worker
+        Worker -->|Ingest Biometrics & Workouts| DB
+        Worker -->|Trigger AI Analysis| AI
+        DB -->|Contextual Health History| AI
+    end
+
+    subgraph Interfaces ["Client Interfaces (Hybrid)"]
+        TG["Telegram Bot (Push Alerts & Interactive Chat)"]
+        UI["Streamlit Web App (Port 8502 Dashboard)"]
+    end
+
+    GC -->|python-garminconnect| Worker
+    AI -->|Personalized Push Notifications| TG
+    AI -->|Readiness & Workout Insights| UI
+    DB -->|Visual Trends & Metrics| UI
 ```
 
 ---

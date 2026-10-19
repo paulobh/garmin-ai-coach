@@ -19,6 +19,35 @@
 4. **Push Routing:** Telegram alerts are routed independently using each athlete's specific `telegram_chat_id`. Athlete 1 never sees Athlete 2's alerts.
 5. **Dashboard Switching:** In the Streamlit web app, a simple dropdown in the sidebar allows toggling between profiles.
 
+```mermaid
+flowchart LR
+    subgraph Config ["config/users.yaml"]
+        U1["Athlete 1 (Paulo)"]
+        U2["Athlete 2 (Partner)"]
+    end
+
+    subgraph Sessions ["OAuth Session Tokens"]
+        T1["data/tokens/paulo/tokens.json"]
+        T2["data/tokens/partner/tokens.json"]
+    end
+
+    subgraph DB ["Local Database (SQLite)"]
+        D1[("Records (user_id='paulo')")]
+        D2[("Records (user_id='partner')")]
+    end
+
+    subgraph Delivery ["Personalized Delivery"]
+        TG1["Telegram Chat 1 (Paulo)"]
+        TG2["Telegram Chat 2 (Partner)"]
+        UI["Streamlit Switcher\n[Paulo | Partner]"]
+    end
+
+    U1 --> T1 --> D1 --> TG1
+    U2 --> T2 --> D2 --> TG2
+    D1 --> UI
+    D2 --> UI
+```
+
 ---
 
 ## Configuration Example

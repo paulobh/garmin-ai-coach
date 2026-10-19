@@ -15,27 +15,27 @@ flowchart TD
 
     subgraph IngestionEngine ["1. Data Ingestion Layer"]
         GC["Garmin Connect Cloud"]
-        Client["GarminCoachClient<br/>(python-garminconnect)"]
-        Tokens["data/tokens/{athlete_id}/tokens.json<br/>(OAuth Token Cache + Auto-Refresh)"]
-        Worker["SyncWorker Daemon<br/>(Every 30 mins)"]
+        Client["GarminCoachClient (python-garminconnect)"]
+        Tokens["OAuth Token Cache (data/tokens/{athlete_id}/tokens.json)"]
+        Worker["SyncWorker Daemon (Every 30 mins)"]
     end
 
     subgraph DataStorage ["2. Local Storage"]
-        DB[("Local SQLite Database<br/>data/garmin_coach.db")]
+        DB[("Local SQLite Database (data/garmin_coach.db)")]
         T_Athletes["Table: athletes"]
-        T_Health["Table: daily_health<br/>(Sleep, HRV, Body Battery, RHR)"]
-        T_Acts["Table: activities<br/>(Runs, Rides, Trails, Strength)"]
-        T_Insights["Table: ai_insights<br/>(Morning, Post-Workout, Chat)"]
+        T_Health["Table: daily_health (Sleep, HRV, Body Battery, RHR)"]
+        T_Acts["Table: activities (Runs, Rides, Trails, Strength)"]
+        T_Insights["Table: ai_insights (Morning, Post-Workout, Chat)"]
     end
 
     subgraph ReasoningEngine ["3. AI Intelligence Layer"]
-        Prompts["Sport-Specific Prompt Engine<br/>• Morning Readiness<br/>• Post-Workout Breakdown<br/>• Interactive Coach"]
-        LLM["Google Gemini API<br/>(gemini-2.5-flash with model fallback)"]
+        Prompts["Sport-Specific Prompt Engine\n(Morning, Post-Workout, Chat)"]
+        LLM["Google Gemini API (gemini-2.5-flash with fallback)"]
     end
 
     subgraph DeliveryLayer ["4. User Interfaces (Hybrid)"]
-        TG["Telegram Bot Service<br/>• Personalized Push Notifications<br/>• Commands: /readiness, /workout, /coach"]
-        WebUI["Streamlit Web Dashboard (Port 8502)<br/>• Athlete Profile Switcher<br/>• Biometric KPI Cards & Plotly Charts<br/>• Interactive Chat"]
+        TG["Telegram Bot Service\n(Personalized Push & Commands)"]
+        WebUI["Streamlit Web Dashboard (Port 8502)\n(Profile Switcher, Trends, & Management)"]
     end
 
     Athletes --> Client

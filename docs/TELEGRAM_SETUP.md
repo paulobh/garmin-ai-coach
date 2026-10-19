@@ -40,6 +40,27 @@ To ensure your health data remains completely private and only messages you:
 
 ## 3. Interacting with Your Coach
 
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Athlete as Athlete (Telegram)
+    participant Bot as Telegram Bot Service
+    participant DB as SQLite DB
+    participant AI as Gemini AI Engine
+
+    Note over Athlete, Bot: Proactive Push Notifications
+    Bot->>DB: Query today's biometrics & activities
+    Bot->>AI: Synthesize readiness or post-workout metrics
+    Bot-->>Athlete: 🌅 Morning Briefing or 🏃 Workout Analysis
+
+    Note over Athlete, Bot: Interactive Q&A
+    Athlete->>Bot: /coach Should I do intervals today?
+    Bot->>DB: Retrieve 14-day health & workout history
+    Bot->>AI: Reason over question using athlete context
+    AI-->>Bot: Personalized coach verdict
+    Bot-->>Athlete: Direct advice
+```
+
 Once the bot service is running, open your new bot on Telegram and test the commands:
 
 | Command | Action |
