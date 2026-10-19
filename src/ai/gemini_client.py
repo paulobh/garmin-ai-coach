@@ -23,15 +23,59 @@ FALLBACK_MODELS = [GEMINI_MODEL, "gemini-2.5-flash", "gemini-1.5-flash", "gemini
 CANDIDATE_MODELS = list(dict.fromkeys(FALLBACK_MODELS))
 
 
+import requests
+from src.config import (
+    AI_PROVIDER,
+    GEMINI_API_KEY,
+    GEMINI_MODEL,
+    OPENAI_API_KEY,
+    OPENAI_BASE_URL,
+    OPENAI_MODEL,
+)
+
 class GeminiCoach:
     def __init__(self, api_key: str = GEMINI_API_KEY):
+        self.provider = AI_PROVIDER
         self.api_key = api_key
-        if api_key:
-            genai.configure(api_key=api_key)
+        self.openai_api_key = OPENAI_API_KEY
+        self.openai_base_url = OPENAI_BASE_URL
+        self.openai_model = OPENAI_MODEL
+
+        if self.provider == "gemini":
+            if api_key:
+                genai.configure(api_key=api_key)
+            else:
+                logger.warning("GEMINI_API_KEY not configured! AI insights will not generate.")
         else:
-            logger.warning("GEMINI_API_KEY not configured! AI insights will not generate.")
+            logger.info(f"Using OpenAI-compatible provider at {self.openai_base_url} with model {self.openai_model}")
+
+    def _call_openai_compatible(self, prompt: str, system_instruction: str = SYSTEM_PROMPT) -> str:
+        url = f"{self.openai_base_url}/chat/completions"
+        headers = {"Content-Type": "application/json"}
+        if self.openai_api_key:
+            headers["Authorization"] = f"Bearer {self.openai_api_key}"
+
+        payload = {
+            "model": self.openai_model,
+            "messages": [
+                {"role": "system", "content": system_instruction},
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": 0.7
+        }
+        try:
+            resp = requests.post(url, headers=headers, json=payload, timeout=60)
+            resp.raise_for_status()
+            data = resp.json()
+            return data["choices"][0]["message"]["content"].strip()
+        except Exception as e:
+            logger.error(f"Error calling OpenAI-compatible provider at {url}: {e}")
+            return f"⚠️ Error calling AI provider ({e})."
 
     def _call_model_with_fallback(self, prompt: str, system_instruction: str = SYSTEM_PROMPT) -> str:
+        if self.provider != "gemini":
+            return self._call_openai_compatible(prompt, system_instruction)
+
         if not self.api_key:
             return "⚠️ Gemini API Key is missing. Please set GEMINI_API_KEY in your .env file."
 
@@ -60,6 +104,7 @@ class GeminiCoach:
                 break
 
         return f"⚠️ Unable to generate AI insight at this time ({last_error}). Please try again later."
+
 
     def generate_morning_insight(self, athlete: Dict[str, Any], today_health: Dict[str, Any], historical: List[Dict[str, Any]], force_refresh: bool = False) -> str:
         user_id = athlete["id"]

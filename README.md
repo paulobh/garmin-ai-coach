@@ -11,9 +11,10 @@
 [![Google Gemini](https://img.shields.io/badge/AI-Google%20Gemini-8E75C2.svg)](https://aistudio.google.com/)
 
 [Getting Started](docs/GETTING_STARTED.md) •
-[Architecture](docs/ARCHITECTURE.md) •
+[AI Providers & Keys](docs/AI_KEYS_AND_PROVIDERS.md) •
 [Telegram Setup](docs/TELEGRAM_SETUP.md) •
-[Multi-User Setup](docs/MULTI_USER.md)
+[Multi-User Setup](docs/MULTI_USER.md) •
+[Architecture](docs/ARCHITECTURE.md)
 
 </div>
 
@@ -29,8 +30,9 @@ Instead of isolated numbers, it correlates your **acute workout strain** with yo
 * **🏃‍♂️ Post-Workout Breakdown:** Analyzes completed runs, rides, trails, racket matches, and gym sessions against your recovery status.
 * **👥 Multi-Athlete / Household Ready:** Supports multiple Garmin accounts under one installation (ideal for couples or training partners) with isolated Telegram push notifications and a dashboard profile switcher.
 * **🔒 Privacy-First & Local Storage:** All biometrics are stored locally in an embedded SQLite database. OAuth session tokens are cached securely and never committed to version control.
-* **⚡ Resilient AI Pipeline:** Powered by **Google Gemini** with automated model fallback (`gemini-2.5-flash` $\rightarrow$ `gemini-1.5-flash` $\rightarrow$ `gemini-2.0-flash`) for fast, cost-effective inference.
+* **⚡ Multi-AI Engine Support:** Works out of the box with **Google Gemini** (free tier with automated model fallback), or switch to **OpenAI** (GPT-4o), **Groq** (Llama 3.3 70B), **OpenRouter** (Claude 3.5 Sonnet), or **Local Ollama** for 100% offline privacy.
 * **💬 Conversational Coach:** Ask your coach questions anytime via Telegram (`/coach ...`) or through the Streamlit interactive chat.
+
 
 ---
 

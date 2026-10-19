@@ -70,3 +70,34 @@ Once the bot service is running, open your new bot on Telegram and test the comm
 | `/workout` | Reviews your most recent workout and the AI recovery breakdown. |
 | `/coach <question>` | Ask any question (e.g., `/coach Should I do my threshold run today with my current HRV?`). |
 | Any plain text | Treated as a direct question to your coach using your last 14 days of biometrics. |
+
+---
+
+## 4. Register Bot Menu Commands (Optional Polish)
+
+To make Telegram display the command suggestions menu when you type `/`:
+
+1. Message **`@BotFather`** on Telegram and type:
+   ```text
+   /setcommands
+   ```
+2. Select your newly created bot.
+3. Paste the following block:
+   ```text
+   readiness - Today's sleep score, HRV & coach briefing
+   workout - Breakdown of your latest workout
+   coach - Ask training advice or recovery tips
+   help - Show help and linked profile info
+   ```
+
+---
+
+## 5. Troubleshooting & FAQ
+
+* **The bot isn't sending messages to me:**
+  * Telegram requires that you initiate a conversation first. Open your bot in Telegram and tap **Start** (or send `/start`).
+  * Verify that the numeric `Id:` from `@userinfobot` exactly matches the `telegram_chat_id` in `config/users.yaml` or in the **Manage Athletes** tab in Streamlit.
+* **Testing your Telegram connection immediately:**
+  * Run: `python -m src.main --mode bot`
+  * Send `/start` to your bot. If properly linked, it will reply: `Welcome back, Paulo! Your Garmin AI Coach is active.`
+

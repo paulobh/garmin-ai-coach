@@ -91,10 +91,11 @@ if app_mode == "⚙️ Manage Athletes":
     st.title("⚙️ Athlete & Account Management")
     st.caption("Configure multi-athlete profiles, credentials, Telegram alerts, and test 2FA connections.")
 
-    m_tab1, m_tab2, m_tab3 = st.tabs([
+    m_tab1, m_tab2, m_tab3, m_tab4 = st.tabs([
         "✏️ Edit Athletes",
         "➕ Add New Athlete",
         "🔐 Test Connection & 2FA",
+        "📖 API Keys & Telegram Guide",
     ])
 
     # ---------------- TAB 1: EDIT ATHLETE ----------------
@@ -324,6 +325,76 @@ if app_mode == "⚙️ Manage Athletes":
                                 st.rerun()
                             else:
                                 st.error(f"Verification failed: {err}")
+
+    # ---------------- TAB 4: API KEYS & TELEGRAM GUIDE ----------------
+    with m_tab4:
+        st.subheader("📖 Configuration & API Keys Reference")
+
+        with st.expander("🤖 1. Setting up Telegram Bot & Chat ID", expanded=True):
+            st.markdown("""
+            **Why Telegram?** Receive your **morning readiness briefings** at 7 AM and **post-workout recovery analysis** right after finishing a run or ride.
+
+            1. **Create Bot Token:**
+               - Open Telegram and message **[@BotFather](https://t.me/BotFather)**.
+               - Send `/newbot`, give it a name and a username ending in `bot`.
+               - Copy the API Token and place it in `.env`:
+                 ```dotenv
+                 TELEGRAM_BOT_TOKEN=123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ
+                 ```
+            2. **Get Your Personal Chat ID:**
+               - Message **[@userinfobot](https://t.me/userinfobot)** on Telegram and press **Start**.
+               - Copy the numerical ID (e.g. `8145384177`).
+               - Paste it into the athlete's profile in the **✏️ Edit Athletes** tab above.
+            3. **Start Conversation:**
+               - Open your newly created bot in Telegram and send `/start` so it has permission to message you.
+            """)
+
+        with st.expander("🌟 2. Google Gemini API Key (Recommended & Free)", expanded=True):
+            st.markdown("""
+            **Why Gemini?** Generous free tier (up to 15 requests/min), sub-second inference speeds, and huge context windows.
+
+            1. Visit **[Google AI Studio](https://aistudio.google.com/)**.
+            2. Sign in with any Google account.
+            3. Click **"Get API key"** in the sidebar $\\rightarrow$ **"Create API key in new project"**.
+            4. Copy your key (`AIzaSy...`) and add it to `.env`:
+               ```dotenv
+               AI_PROVIDER=gemini
+               GEMINI_API_KEY=AIzaSyD...your_key_here
+               GEMINI_MODEL=gemini-2.5-flash
+               ```
+            """)
+
+        with st.expander("⚡ 3. Alternative AI Providers (OpenAI, Groq, Ollama, OpenRouter)"):
+            st.markdown("""
+            You can also use other AI engines by setting `AI_PROVIDER=openai` in `.env`:
+
+            * **OpenAI (ChatGPT):**
+              ```dotenv
+              AI_PROVIDER=openai
+              OPENAI_API_KEY=sk-...your_key
+              OPENAI_BASE_URL=https://api.openai.com/v1
+              OPENAI_MODEL=gpt-4o-mini
+              ```
+
+            * **Groq Cloud (Free & Ultra Fast):**
+              * Get a key at [Groq Console](https://console.groq.com/keys)
+              ```dotenv
+              AI_PROVIDER=openai
+              OPENAI_API_KEY=gsk_...your_groq_key
+              OPENAI_BASE_URL=https://api.groq.com/openai/v1
+              OPENAI_MODEL=llama-3.3-70b-versatile
+              ```
+
+            * **Local Ollama (100% Offline & Private):**
+              * Run `ollama run llama3.1` locally
+              ```dotenv
+              AI_PROVIDER=openai
+              OPENAI_API_KEY=ollama
+              OPENAI_BASE_URL=http://localhost:11434/v1
+              OPENAI_MODEL=llama3.1
+              ```
+            """)
+
 
 
 # =========================================================================
