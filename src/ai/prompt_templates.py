@@ -32,6 +32,12 @@ def format_seconds(seconds: Any) -> str:
         return str(seconds)
 
 
+def get_language_instruction(lang: str) -> str:
+    if str(lang).lower().startswith("en"):
+        return "CRITICAL LANGUAGE REQUIREMENT: Output your ENTIRE response in natural, fluent ENGLISH."
+    return "REQUISITO CRÍTICO DE IDIOMA: Responda 100% em PORTUGUÊS (pt-BR) fluente, técnico e motivador."
+
+
 def build_morning_prompt(athlete_profile: Dict[str, Any], today_health: Dict[str, Any], historical: List[Dict[str, Any]]) -> str:
     lang = athlete_profile.get("preferences", {}).get("language", "pt-BR")
     sports = ", ".join(athlete_profile.get("primary_sports", ["running", "cycling"]))
@@ -45,6 +51,8 @@ def build_morning_prompt(athlete_profile: Dict[str, Any], today_health: Dict[str
             avg_sleep_score = round(sum(valid_scores) / len(valid_scores), 1)
 
     prompt = f"""
+{get_language_instruction(lang)}
+
 Language requested: {lang}
 Athlete: {name}
 Primary Sports: {sports}
@@ -80,6 +88,8 @@ def build_activity_prompt(athlete_profile: Dict[str, Any], activity: Dict[str, A
     duration_str = format_seconds(activity.get("duration_seconds", 0))
 
     prompt = f"""
+{get_language_instruction(lang)}
+
 Language requested: {lang}
 Athlete: {name}
 
@@ -127,6 +137,8 @@ def build_chat_prompt(athlete_profile: Dict[str, Any], user_question: str, recen
     health_str = "\n".join(health_summary) if health_summary else "No recent daily health data."
 
     prompt = f"""
+{get_language_instruction(lang)}
+
 Language requested: {lang}
 Athlete: {name}
 Primary Sports: {sports}
