@@ -88,9 +88,19 @@ users:
       - "running"
       - "strength_training"
     preferences:
-      language: "pt-BR"
+      language: "en" # English for non-Portuguese speakers
       coaching_style: "encouraging"
 ```
+
+---
+
+## Bilingual & Language Preference
+
+Garmin AI Coach natively supports **Portuguese (`pt-BR`)** and **English (`en`)**:
+1. **Dynamic Dashboard Language:** In the sidebar, any user can switch the interface on-the-fly between **🇧🇷 Português** and **🇺🇸 English**.
+2. **Personalized AI Output:** When morning briefings, post-workout insights, or coach chat questions are generated, the AI automatically outputs in the selected language.
+3. **Telegram Notification Language:** Scheduled morning briefings sent to each athlete's Telegram chat will use their respective `preferences.language` configured in `config/users.yaml`.
+
 
 ---
 
