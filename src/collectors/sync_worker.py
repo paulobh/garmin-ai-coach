@@ -5,7 +5,7 @@ Periodically ingests health metrics & activities, detects new workouts, and send
 import time
 import logging
 import argparse
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import Dict, Any
 
 from src.config import load_users_config, SYNC_INTERVAL_MINUTES
@@ -25,6 +25,23 @@ from src.bot.telegram_service import send_notification
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
+
+
+def is_recent_activity(act: Dict[str, Any], max_hours: int = 6) -> bool:
+    """Checks if an activity occurred recently (within max_hours) to prevent alerting on old historical workouts."""
+    start_str = act.get("startTimeLocal") or act.get("start_time") or ""
+    if not start_str:
+        return False
+    try:
+        clean_str = start_str.replace("Z", "").split(".")[0]
+        if "T" in clean_str:
+            act_dt = datetime.fromisoformat(clean_str)
+        else:
+            act_dt = datetime.strptime(clean_str, "%Y-%m-%d %H:%M:%S")
+        return (datetime.now() - act_dt) <= timedelta(hours=max_hours)
+    except Exception:
+        return start_str[:10] == date.today().isoformat()
+
 
 
 class SyncWorker:
@@ -61,6 +78,10 @@ class SyncWorker:
             logger.error(f"Error syncing daily metrics for {user_id}: {e}")
             daily_metrics = {}
 
+        # Check if athlete has any recorded activities in DB (to prevent backfill alert storms)
+        existing_recorded_acts = get_recent_activities(user_id, limit=1)
+        is_first_sync = len(existing_recorded_acts) == 0
+
         # 2. Sync Recent Activities
         newly_synced_activities = []
         try:
@@ -68,12 +89,17 @@ class SyncWorker:
             activities = client.get_recent_activities(limit=10)
             for act in activities:
                 act_id = act.get("activityId")
-                # Check if this is a newly detected activity
                 existing_insight = get_latest_insight(user_id, "post_activity", str(act_id))
                 upsert_activity(user_id, act)
-                if not existing_insight:
+
+                # Only queue for proactive Telegram alert if:
+                # 1. Not an initial backfill sync
+                # 2. No insight was already generated
+                # 3. The activity actually occurred recently (within the last 6 hours)!
+                if not is_first_sync and not existing_insight and is_recent_activity(act, max_hours=6):
                     newly_synced_activities.append(act)
-            logger.info(f"Synced {len(activities)} activities for {user_id}.")
+
+            logger.info(f"Synced {len(activities)} activities for {user_id} ({len(newly_synced_activities)} recent workouts alerting).")
         except Exception as e:
             logger.error(f"Error syncing activities for {user_id}: {e}")
 
@@ -84,12 +110,19 @@ class SyncWorker:
 
             existing_morning = get_latest_insight(user_id, "morning", today_str)
             if not existing_morning and current_time_str >= morning_report_time:
-                logger.info(f"Generating morning briefing for {display_name}...")
-                historical = get_recent_daily_health(user_id, days=14)
-                briefing = self.ai.generate_morning_insight(user, daily_metrics, historical)
-                msg = f"🌅 *Good Morning, {display_name}! Here is your Daily Readiness Briefing:*\n\n{briefing}"
-                send_notification(chat_id, msg)
-                logger.info(f"Morning briefing delivered to Telegram chat {chat_id}.")
+                # Validate that the user actually wore their watch and Garmin captured real sleep/HRV data
+                has_sleep = bool(daily_metrics.get("sleep_score") or (daily_metrics.get("sleep_seconds") and daily_metrics.get("sleep_seconds") > 1800))
+                has_hrv = bool(daily_metrics.get("hrv_last_night") or daily_metrics.get("hrv_status"))
+
+                if not (has_sleep or has_hrv):
+                    logger.info(f"Skipping morning briefing for {display_name}: No sleep or HRV recorded for {today_str} (watch was not worn).")
+                else:
+                    logger.info(f"Generating morning briefing for {display_name}...")
+                    historical = get_recent_daily_health(user_id, days=14)
+                    briefing = self.ai.generate_morning_insight(user, daily_metrics, historical)
+                    msg = f"🌅 *Good Morning, {display_name}! Here is your Daily Readiness Briefing:*\n\n{briefing}"
+                    send_notification(chat_id, msg)
+                    logger.info(f"Morning briefing delivered to Telegram chat {chat_id}.")
 
         # 4. Post-Activity Report Trigger
         if user.get("send_activity_report", True) and chat_id:
