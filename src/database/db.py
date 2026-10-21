@@ -92,9 +92,17 @@ def init_db():
                 ref_id TEXT,               -- date (YYYY-MM-DD) or activity_id
                 prompt TEXT,
                 text TEXT NOT NULL,
+                language TEXT DEFAULT 'pt-BR',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
+
+        # Migration to add language column if it doesn't exist
+        try:
+            cursor.execute("ALTER TABLE ai_insights ADD COLUMN language TEXT DEFAULT 'pt-BR'")
+        except sqlite3.OperationalError:
+            pass
+
         conn.commit()
         logger.info(f"Database initialized at {DB_PATH}")
 
@@ -252,20 +260,30 @@ def get_activity_by_id(activity_id: int) -> Optional[Dict[str, Any]]:
         return dict(row) if row else None
 
 
-def save_insight(user_id: str, insight_type: str, ref_id: str, prompt: str, text: str) -> int:
+def save_insight(user_id: str, insight_type: str, ref_id: str, prompt: str, text: str, language: str = "pt-BR") -> int:
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO ai_insights (user_id, insight_type, ref_id, prompt, text)
-            VALUES (?, ?, ?, ?, ?)
-        """, (user_id, insight_type, str(ref_id), prompt, text))
+            INSERT INTO ai_insights (user_id, insight_type, ref_id, prompt, text, language)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (user_id, insight_type, str(ref_id), prompt, text, language))
         conn.commit()
         return cursor.lastrowid
 
 
-def get_latest_insight(user_id: str, insight_type: str, ref_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
+def get_latest_insight(user_id: str, insight_type: str, ref_id: Optional[str] = None, language: Optional[str] = None) -> Optional[Dict[str, Any]]:
     with get_connection() as conn:
         cursor = conn.cursor()
+        if language and ref_id:
+            cursor.execute("""
+                SELECT * FROM ai_insights
+                WHERE user_id = ? AND insight_type = ? AND ref_id = ? AND language = ?
+                ORDER BY created_at DESC LIMIT 1
+            """, (user_id, insight_type, str(ref_id), language))
+            row = cursor.fetchone()
+            if row:
+                return dict(row)
+
         if ref_id:
             cursor.execute("""
                 SELECT * FROM ai_insights
@@ -280,3 +298,16 @@ def get_latest_insight(user_id: str, insight_type: str, ref_id: Optional[str] = 
             """, (user_id, insight_type))
         row = cursor.fetchone()
         return dict(row) if row else None
+
+
+def get_insight_by_language(user_id: str, insight_type: str, ref_id: str, language: str) -> Optional[Dict[str, Any]]:
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT * FROM ai_insights
+            WHERE user_id = ? AND insight_type = ? AND ref_id = ? AND language = ?
+            ORDER BY created_at DESC LIMIT 1
+        """, (user_id, insight_type, str(ref_id), language))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+

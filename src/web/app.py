@@ -496,23 +496,68 @@ else:
         # AI Morning Briefing Card
         st.subheader(t("morning_briefing_title", lang))
 
-        cached_morning = get_latest_insight(user_id, "morning", today_str)
+        # Check existing versions
+        insight_pt = get_latest_insight(user_id, "morning", today_str, language="pt-BR")
+        insight_en = get_latest_insight(user_id, "morning", today_str, language="en")
+        legacy_insight = get_latest_insight(user_id, "morning", today_str) if not (insight_pt or insight_en) else None
 
-        c_left, c_right = st.columns([4, 1])
-        with c_right:
+        user_override = st.session_state.get(f"view_morning_lang_{today_str}")
+        view_lang = user_override or lang
+
+        display_insight = None
+        if view_lang == "en" and insight_en:
+            display_insight = insight_en
+        elif view_lang == "pt-BR" and insight_pt:
+            display_insight = insight_pt
+        else:
+            display_insight = insight_pt or insight_en or legacy_insight
+
+        c_left, c_toggle, c_btn = st.columns([3, 1, 1])
+        with c_btn:
             regenerate_btn = st.button(t("btn_regenerate", lang), use_container_width=True)
+
+        with c_toggle:
+            if display_insight:
+                if insight_pt and insight_en:
+                    current_is_pt = (display_insight == insight_pt)
+                    switch_btn_label = "🇺🇸 English" if current_is_pt else "🇧🇷 Português"
+                    if st.button(f"🌐 {switch_btn_label}", key=f"switch_morning_{today_str}", use_container_width=True):
+                        st.session_state[f"view_morning_lang_{today_str}"] = "en" if current_is_pt else "pt-BR"
+                        st.rerun()
+                elif insight_pt and not insight_en:
+                    if st.button(t("btn_translate_to_en", lang), key=f"trans_en_morning_{today_str}", use_container_width=True):
+                        with st.spinner(t("translating_insight", lang)):
+                            ai_coach.translate_and_save_insight(user_id, "morning", today_str, insight_pt["text"], "en")
+                            st.session_state[f"view_morning_lang_{today_str}"] = "en"
+                            st.rerun()
+                elif insight_en and not insight_pt:
+                    if st.button(t("btn_translate_to_pt", lang), key=f"trans_pt_morning_{today_str}", use_container_width=True):
+                        with st.spinner(t("translating_insight", lang)):
+                            ai_coach.translate_and_save_insight(user_id, "morning", today_str, insight_en["text"], "pt-BR")
+                            st.session_state[f"view_morning_lang_{today_str}"] = "pt-BR"
+                            st.rerun()
+                elif legacy_insight:
+                    target_t = "en" if lang == "en" else "pt-BR"
+                    lbl = t("btn_translate_to_en", lang) if target_t == "en" else t("btn_translate_to_pt", lang)
+                    if st.button(lbl, key=f"trans_legacy_morning_{today_str}", use_container_width=True):
+                        with st.spinner(t("translating_insight", lang)):
+                            ai_coach.translate_and_save_insight(user_id, "morning", today_str, legacy_insight["text"], target_t)
+                            st.session_state[f"view_morning_lang_{today_str}"] = target_t
+                            st.rerun()
 
         if regenerate_btn:
             with st.spinner(t("analyzing_biometrics", lang)):
                 briefing = ai_coach.generate_morning_insight(athlete_for_ai, today_health, recent_health, force_refresh=True)
+                st.session_state[f"view_morning_lang_{today_str}"] = lang
                 st.rerun()
-        elif cached_morning:
-            st.markdown(cached_morning["text"])
+        elif display_insight:
+            st.markdown(display_insight["text"])
         else:
             if today_health:
                 if st.button(t("btn_generate_morning", lang), type="primary"):
                     with st.spinner(t("synthesizing_metrics", lang)):
                         briefing = ai_coach.generate_morning_insight(athlete_for_ai, today_health, recent_health)
+                        st.session_state[f"view_morning_lang_{today_str}"] = lang
                         st.rerun()
             else:
                 st.info(t("no_health_today", lang))
@@ -576,14 +621,66 @@ else:
             st.divider()
             st.subheader(t("post_workout_title", lang))
             act_id = str(act.get("activity_id"))
-            cached_act_insight = get_latest_insight(user_id, "post_activity", act_id)
 
-            if cached_act_insight:
-                st.markdown(cached_act_insight["text"])
+            # Check existing versions
+            act_insight_pt = get_latest_insight(user_id, "post_activity", act_id, language="pt-BR")
+            act_insight_en = get_latest_insight(user_id, "post_activity", act_id, language="en")
+            act_legacy = get_latest_insight(user_id, "post_activity", act_id) if not (act_insight_pt or act_insight_en) else None
+
+            act_user_override = st.session_state.get(f"view_act_lang_{act_id}")
+            act_view_lang = act_user_override or lang
+
+            display_act_insight = None
+            if act_view_lang == "en" and act_insight_en:
+                display_act_insight = act_insight_en
+            elif act_view_lang == "pt-BR" and act_insight_pt:
+                display_act_insight = act_insight_pt
+            else:
+                display_act_insight = act_insight_pt or act_insight_en or act_legacy
+
+            if display_act_insight:
+                c_act_info, c_act_toggle, c_act_btn = st.columns([3, 1, 1])
+                with c_act_btn:
+                    if st.button("✨ " + t("btn_regenerate", lang), key=f"regen_act_{act_id}", use_container_width=True):
+                        with st.spinner(t("analyzing_workout", lang)):
+                            insight_text = ai_coach.generate_post_activity_insight(athlete_for_ai, act, today_health, force_refresh=True)
+                            st.session_state[f"view_act_lang_{act_id}"] = lang
+                            st.rerun()
+
+                with c_act_toggle:
+                    if act_insight_pt and act_insight_en:
+                        current_is_pt = (display_act_insight == act_insight_pt)
+                        switch_btn_label = "🇺🇸 English" if current_is_pt else "🇧🇷 Português"
+                        if st.button(f"🌐 {switch_btn_label}", key=f"switch_act_{act_id}", use_container_width=True):
+                            st.session_state[f"view_act_lang_{act_id}"] = "en" if current_is_pt else "pt-BR"
+                            st.rerun()
+                    elif act_insight_pt and not act_insight_en:
+                        if st.button(t("btn_translate_to_en", lang), key=f"trans_en_act_{act_id}", use_container_width=True):
+                            with st.spinner(t("translating_insight", lang)):
+                                ai_coach.translate_and_save_insight(user_id, "post_activity", act_id, act_insight_pt["text"], "en")
+                                st.session_state[f"view_act_lang_{act_id}"] = "en"
+                                st.rerun()
+                    elif act_insight_en and not act_insight_pt:
+                        if st.button(t("btn_translate_to_pt", lang), key=f"trans_pt_act_{act_id}", use_container_width=True):
+                            with st.spinner(t("translating_insight", lang)):
+                                ai_coach.translate_and_save_insight(user_id, "post_activity", act_id, act_insight_en["text"], "pt-BR")
+                                st.session_state[f"view_act_lang_{act_id}"] = "pt-BR"
+                                st.rerun()
+                    elif act_legacy:
+                        target_t = "en" if lang == "en" else "pt-BR"
+                        lbl = t("btn_translate_to_en", lang) if target_t == "en" else t("btn_translate_to_pt", lang)
+                        if st.button(lbl, key=f"trans_legacy_act_{act_id}", use_container_width=True):
+                            with st.spinner(t("translating_insight", lang)):
+                                ai_coach.translate_and_save_insight(user_id, "post_activity", act_id, act_legacy["text"], target_t)
+                                st.session_state[f"view_act_lang_{act_id}"] = target_t
+                                st.rerun()
+
+                st.markdown(display_act_insight["text"])
             else:
                 if st.button(t("btn_generate_post", lang), type="primary"):
                     with st.spinner(t("analyzing_workout", lang)):
                         insight_text = ai_coach.generate_post_activity_insight(athlete_for_ai, act, today_health)
+                        st.session_state[f"view_act_lang_{act_id}"] = lang
                         st.rerun()
 
     # ---------------- TAB 3: TRENDS ----------------
